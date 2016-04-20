@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\학교관련\2학년 1학기\프로그래밍 실습\갤러그\갤러그.c">
+    <ClCompile Include="갤러그.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

@@ -7,12 +7,22 @@ void menu(void);
 void gotoxy(int , int );
 int select_num(void);
 void cursor_control(char, int *, int *, int *);
-
+void game_play();
+void player_move(int*, int*);
+void fire(int, int);
 
 int main()
-{ 
+{
 	menu();
-	select_num();
+	switch (select_num()) {
+	case 1:
+		game_play();
+		break;
+
+	default:
+		break;
+
+	}
 }
 
 void menu()
@@ -112,4 +122,60 @@ void cursor_control(char cursor, int *x, int *y, int *space)
 	default:
 		break;
 	}
+}
+
+void game_play()
+{
+	int x = 20, y = 28;
+
+	system("cls");
+	while (1)
+	{
+		player_move(&x, &y);
+	}
+
+}
+
+void player_move(int *x, int *y)
+{
+	char cursor;
+	int space = 0;
+
+	gotoxy(*x, *y);
+	printf("*^*");
+	while (1)
+	{
+		cursor = getch();
+		gotoxy(*x, *y);
+		printf("   ");
+		cursor_control(cursor, x, y, &space);
+
+		*y = 28;
+
+		gotoxy(*x, *y);
+		printf("*^*");
+
+		if (space == 1)
+		{
+			fire(*x, *y);
+			break;
+		}
+	}
+}
+
+void fire(int x, int y)
+{
+	x += 1;
+	y -= 1;
+	
+	while (y != 0) 
+	{
+		gotoxy(x, y);
+		printf(" ");
+		gotoxy(x, --y);
+		printf("!");
+		Sleep(50);
+	}
+	gotoxy(x, y);
+	printf(" ");
 }

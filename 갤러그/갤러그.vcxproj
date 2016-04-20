@@ -18,6 +18,9 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="갤러그.c" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C79BDE36-8E52-40F3-B3A2-BDB12622FD4F}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -141,9 +144,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\..\..\학교관련\2학년 1학기\프로그래밍 실습\갤러그\갤러그.c" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

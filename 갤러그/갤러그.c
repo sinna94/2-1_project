@@ -3,19 +3,25 @@
 #include <stdlib.h>
 #include <conio.h>
 
+int game_arr[28][90];
+
+void arr_init(int [28][90]);
+void arr_print(char [28][90]);
 void menu(void);
 void gotoxy(int , int );
 int select_num(void);
 void cursor_control(char, int *, int *, int *);
 void game_play();
-void player_move(int*, int*);
-void fire(int, int);
+void player_move(int [28][90], int *, int *);
+void fire(int *, int *);
 
 int main()
 {
+	
 	menu();
 	switch (select_num()) {
 	case 1:
+		arr_init(game_arr);
 		game_play();
 		break;
 
@@ -25,6 +31,49 @@ int main()
 	}
 }
 
+void arr_init(char game_arr[28][90])
+{
+	int i, j;
+	for (i = 0; i < 28; i++)
+	{
+		for (j = 0; j < 90; j++)
+		{
+			if (i < 4 && (j > 10 && j < 80))
+				game_arr[i][j] = 1;				/*enemy*/
+			else if (i == 28 && j == 45)
+				game_arr[i][j] = 2;				/*player*/
+			else
+				game_arr[i][j] = 0;
+		}
+	}
+}
+
+void arr_print(char game_arr[28][90])
+{
+	int i, j;
+	for (i = 0; i < 28; i++)
+	{
+		for (j = 0; j < 90; j++)
+		{
+			switch (game_arr[i][j]) {
+			case 0:
+				break;
+			case 1:
+				printf("@");	/*enemy*/
+				break;
+			case 2:
+				printf("*^*");	/*player*/
+				break;
+			case 3:
+				printf("!");	/*missile*/
+				break;
+			default:
+				break;
+			}
+		}
+		printf("\n");
+	}
+}
 void menu()
 {
 	int sel_num = 0;
@@ -126,56 +175,47 @@ void cursor_control(char cursor, int *x, int *y, int *space)
 
 void game_play()
 {
-	int x = 20, y = 28;
+	int x = 45, y = 28;
 
 	system("cls");
+	
 	while (1)
 	{
-		player_move(&x, &y);
+		gotoxy(0, 0);
+		arr_print(game_arr);
+		player_move(game_arr, &x, &y);
 	}
 
 }
 
-void player_move(int *x, int *y)
+void player_move(int game_arr[28][90], int *i, int *j)
 {
 	char cursor;
-	int space = 0;
+	int x, y, space = 0;
 
-	gotoxy(*x, *y);
-	printf("*^*");
 	while (1)
 	{
+		game_arr[*i][*j] = 0;
 		cursor = getch();
-		gotoxy(*x, *y);
-		printf("   ");
-		cursor_control(cursor, x, y, &space);
+		cursor_control(cursor, *i, *j, &space);
 
-		*y = 28;
+		j = 28;
 
-		gotoxy(*x, *y);
-		printf("*^*");
+		game_arr[*i][*j] = 2;
 
 		if (space == 1)
 		{
-			fire(*x, *y);
-			break;
+			x = *i;
+			y = *j;
+			fire(&x, &y);
 		}
 	}
 }
 
-void fire(int x, int y)
+void fire(int *x, int *y)
 {
 	x += 1;
 	y -= 1;
 	
-	while (y != 0) 
-	{
-		gotoxy(x, y);
-		printf(" ");
-		gotoxy(x, --y);
-		printf("!");
-		Sleep(50);
-	}
-	gotoxy(x, y);
-	printf(" ");
+	game_arr[*x][*y] = 3;
 }

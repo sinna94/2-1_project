@@ -1,10 +1,8 @@
 ﻿  갤러그.c
-c:\users\sinna\google 드라이브\visual studio 2015\projects\갤러그\갤러그\갤러그.c(109): warning C4996: 'getch': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _getch. See online help for details.
+c:\users\sinna\google 드라이브\visual studio 2015\projects\갤러그\갤러그\갤러그.c(115): warning C4996: 'getch': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _getch. See online help for details.
   c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\conio.h(452): note: 'getch' 선언을 참조하십시오.
-c:\users\sinna\google 드라이브\visual studio 2015\projects\갤러그\갤러그\갤러그.c(201): warning C4047: '함수': 'int *'의 간접 참조 수준이 'int **'과(와) 다릅니다.
-c:\users\sinna\google 드라이브\visual studio 2015\projects\갤러그\갤러그\갤러그.c(201): warning C4024: 'cursor_control': 형식 및 실제 매개 변수 2의 형식이 서로 다릅니다.
-c:\users\sinna\google 드라이브\visual studio 2015\projects\갤러그\갤러그\갤러그.c(201): warning C4024: 'cursor_control': 형식 및 실제 매개 변수 3의 형식이 서로 다릅니다.
-c:\users\sinna\google 드라이브\visual studio 2015\projects\갤러그\갤러그\갤러그.c(200): warning C4996: 'getch': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _getch. See online help for details.
+c:\users\sinna\google 드라이브\visual studio 2015\projects\갤러그\갤러그\갤러그.c(207): warning C4996: 'getch': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _getch. See online help for details.
   c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\conio.h(452): note: 'getch' 선언을 참조하십시오.
-c:\users\sinna\google 드라이브\visual studio 2015\projects\갤러그\갤러그\갤러그.c(144): warning C4715: 'select_num': 모든 제어 경로에서 값을 반환하지는 않습니다.
+c:\users\sinna\google 드라이브\visual studio 2015\projects\갤러그\갤러그\갤러그.c(202): warning C4101: 'mxy' :참조되지 않은 지역 변수입니다.
+c:\users\sinna\google 드라이브\visual studio 2015\projects\갤러그\갤러그\갤러그.c(150): warning C4715: 'select_num': 모든 제어 경로에서 값을 반환하지는 않습니다.
   갤러그.vcxproj -> C:\Users\sinna\Google 드라이브\Visual Studio 2015\Projects\갤러그\x64\Debug\갤러그.exe

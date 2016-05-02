@@ -3,17 +3,21 @@
 #include <stdlib.h>
 #include <conio.h>
 
-int game_arr[28][90];
+typedef struct {
+	int mx;
+	int my;
+}mxy;
+char game_arr[28][90];
 
-void arr_init(int [28][90]);
+void arr_init(char [28][90]);
 void arr_print(char [28][90]);
 void menu(void);
 void gotoxy(int , int );
 int select_num(void);
 void cursor_control(char, int *, int *, int *);
 void game_play();
-void player_move(int [28][90], int *, int *);
-void fire(int *, int *);
+void player_move(char [28][90], int *, int *);
+void missile_move(char [28][90]);
 
 int main()
 {
@@ -38,9 +42,9 @@ void arr_init(char game_arr[28][90])
 	{
 		for (j = 0; j < 90; j++)
 		{
-			if (i < 4 && (j > 10 && j < 80))
+			if (i < 8 && i > 4 && j > 10 && j < 80)
 				game_arr[i][j] = 1;				/*enemy*/
-			else if (i == 28 && j == 45)
+			else if (i == 27 && j == 44)
 				game_arr[i][j] = 2;				/*player*/
 			else
 				game_arr[i][j] = 0;
@@ -51,12 +55,15 @@ void arr_init(char game_arr[28][90])
 void arr_print(char game_arr[28][90])
 {
 	int i, j;
+	missile_move(game_arr);
+
 	for (i = 0; i < 28; i++)
 	{
 		for (j = 0; j < 90; j++)
 		{
 			switch (game_arr[i][j]) {
 			case 0:
+				printf(" ");
 				break;
 			case 1:
 				printf("@");	/*enemy*/
@@ -175,7 +182,7 @@ void cursor_control(char cursor, int *x, int *y, int *space)
 
 void game_play()
 {
-	int x = 45, y = 28;
+	int x = 27, y = 44;
 
 	system("cls");
 	
@@ -188,34 +195,54 @@ void game_play()
 
 }
 
-void player_move(int game_arr[28][90], int *i, int *j)
+void player_move(char game_arr[28][90], int *i, int *j)
 {
 	char cursor;
-	int x, y, space = 0;
+	int x = *j, y = *i , space = 0;
+	mxy mxy;
 
 	while (1)
 	{
 		game_arr[*i][*j] = 0;
-		cursor = getch();
-		cursor_control(cursor, *i, *j, &space);
+		if(cursor = getch());
+			cursor_control(cursor, &x, &y, &space);
 
-		j = 28;
+		*i = 27;
+		*j = x;
 
 		game_arr[*i][*j] = 2;
+		gotoxy(0, 0);
+		arr_print(game_arr);
 
 		if (space == 1)
 		{
-			x = *i;
-			y = *j;
-			fire(&x, &y);
+			game_arr[*i-1][*j] = 3;
+			space = 0;
 		}
 	}
 }
 
-void fire(int *x, int *y)
+
+void missile_move(char game_arr[28][90])
 {
-	x += 1;
-	y -= 1;
-	
-	game_arr[*x][*y] = 3;
+	int i, j;
+	for (i = 0; i < 28; i++)
+	{
+		for (j = 0; j < 90; j++)
+		{
+			if (game_arr[i][j] == 3)
+			{
+				if (game_arr[i - 1][j] == 1)
+				{
+					game_arr[i][j] = 0;
+					game_arr[i - 1][j] = 0;
+				}
+				else 
+				{
+					game_arr[i - 1][j] = 3;
+					game_arr[i][j] = 0;
+				}
+			}
+		}
+	}
 }

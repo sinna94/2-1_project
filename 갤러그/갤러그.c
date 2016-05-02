@@ -3,19 +3,29 @@
 #include <stdlib.h>
 #include <conio.h>
 
+#define N 27
+#define M 61
+
+char game_arr[N][M];
+
+void arr_init(char [N][M]);
+void arr_print(char [N][M]);
 void menu(void);
 void gotoxy(int , int );
 int select_num(void);
 void cursor_control(char, int *, int *, int *);
 void game_play();
-void player_move(int*, int*);
-void fire(int, int);
+void player_move(char [N][M], int *, int *);
+void missile_move(char [N][M]);
+void enemy_move(char [N][M], int *);
 
 int main()
 {
+	
 	menu();
 	switch (select_num()) {
 	case 1:
+		arr_init(game_arr);
 		game_play();
 		break;
 
@@ -25,6 +35,61 @@ int main()
 	}
 }
 
+void arr_init(char game_arr[N][M])
+{
+	int i, j;
+	for (i = 0; i < N; i++)
+	{
+		for (j = 0; j < M; j++)
+		{
+			if (i < 8 && i > 4 && j > 20 && j < 40)
+				game_arr[i][j] = 1;				/*enemy*/
+			else if (j == M - 1)
+				game_arr[i][j] = 3;
+			else
+				game_arr[i][j] = 0;
+		}
+	}
+}
+
+void arr_print(char game_arr[N][M])
+{
+	int i, j;
+
+	for (i = 0; i < N; i++)
+	{
+		for (j = 0; j < M; j++)
+		{
+			switch (game_arr[i][j]) {
+			case 0:
+				printf(" ");
+				break;
+			case 1:
+				printf("@");	/*enemy*/
+				break;
+			case 2:
+				printf("!");	/*missile*/
+
+				if (game_arr[i - 1][j] == 1)
+				{
+					game_arr[i][j] = 0;
+					game_arr[i - 1][j] = 0;
+				}
+				else
+				{
+					game_arr[i - 1][j] = 2;
+					game_arr[i][j] = 0;
+				}
+				break;
+			case 3:
+				printf("┃");
+			default:
+				break;
+			}
+		}
+		printf("\n");
+	}
+}
 void menu()
 {
 	int sel_num = 0;
@@ -126,56 +191,131 @@ void cursor_control(char cursor, int *x, int *y, int *space)
 
 void game_play()
 {
-	int x = 20, y = 28;
+	int x = M/2, y = N, way = 0;
 
 	system("cls");
 	while (1)
 	{
-		player_move(&x, &y);
+		enemy_move(game_arr, &way);
+		gotoxy(0, 0);
+		arr_print(game_arr);
+		player_move(game_arr, &x, &y);
 	}
 
 }
 
-void player_move(int *x, int *y)
+void player_move(char game_arr[N][M], int *i, int *j)
 {
 	char cursor;
 	int space = 0;
 
-	gotoxy(*x, *y);
+	gotoxy(*i, *j);
 	printf("*^*");
-	while (1)
+
+	cursor = getch();
+	gotoxy(*i, *j);
+	printf("   ");
+	cursor_control(cursor, i, j, &space);
+
+	*j = N;
+	
+	if (*i >= M-3)
+		*i = M-3;
+
+	gotoxy(*i, *j);
+	printf("*^*");
+
+	if (space == 1)
+		game_arr[*j - 1][*i + 1] = 2;
+}
+
+void missile_move(char game_arr[N][M])
+{
+	int i, j;
+	for (i = 0; i < N; i++)
 	{
-		cursor = getch();
-		gotoxy(*x, *y);
-		printf("   ");
-		cursor_control(cursor, x, y, &space);
-
-		*y = 28;
-
-		gotoxy(*x, *y);
-		printf("*^*");
-
-		if (space == 1)
+		for (j = 0; j < M; j++)
 		{
-			fire(*x, *y);
-			break;
+			if (game_arr[i][j] == 2)
+			{
+				if (game_arr[i - 1][j] == 1)
+				{
+					game_arr[i][j] = 0;
+					game_arr[i - 1][j] = 0;
+				}
+				else 
+				{
+					game_arr[i - 1][j] = 2;
+					game_arr[i][j] = 0;
+				}
+			}
 		}
 	}
 }
 
-void fire(int x, int y)
+void enemy_move(char game_arr[N][M], int *w)
 {
-	x += 1;
-	y -= 1;
-	
-	while (y != 0) 
+	int i, j, l = 0, r = 0;
+	char tmp;
+
+
+
+	if (*w == 0)						/*왼쪽으로 이동*/
 	{
-		gotoxy(x, y);
-		printf(" ");
-		gotoxy(x, --y);
-		printf("!");
-		Sleep(50);
+		for (i = 0; i < N; i++)
+		{
+			for (j = 0; j <= M-1; j++)		/*한칸씩 왼쪽으로 이동*/
+			{
+				if (game_arr[i][j] == 1)
+				{
+					game_arr[i][j - 1] = game_arr[i][j];
+					game_arr[i][j] = 0;
+				}
+			}
+		}
 	}
-	gotoxy(x, y);
-	printf(" ");
+	else if (*w == 1)			/*오른쪽으로 이동*/
+	{
+		for (i = 0; i < N; i++)
+		{
+			for (j = M - 2; j >= 0; j--)		/*한칸씩 오른쪽으로 이동*/
+			{
+				if (game_arr[i][j] == 1)
+				{
+					game_arr[i][j + 1] = game_arr[i][j];
+					game_arr[i][j] = 0;
+				}
+			}
+		}
+	}
+
+	for (i = N; i > 0; i--)					/*양 끝에 도착했는지 검사*/
+	{
+		if (game_arr[i][0] == 1)
+			l = 1;
+		else if (game_arr[i][M - 2] == 1)
+			r = 1;
+	}
+
+	if (r == 1 || l == 1)
+	{
+		for (i = N; i > 0; i--)					/*양 끝에 도착하면 한칸 아래로 이동*/
+		{
+			for (j = 0; j < M-1; j++)
+			{
+				if (game_arr[i][j] == 1)
+				{
+					game_arr[i + 1][j] = game_arr[i][j];
+					game_arr[i][j] = 0;
+				}
+			}
+		}
+		if (r == 1)
+			*w = 0;
+		else if (l == 1)
+			*w = 1;
+
+	}
 }
+
+

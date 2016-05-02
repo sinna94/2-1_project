@@ -1,0 +1,2 @@
+﻿갤러그.obj : warning LNK4075: '/EDITANDCONTINUE'이(가) '/OPT:LBR' 사양으로 인해 무시됩니다.
+  갤러그.vcxproj -> C:\Users\sinna\Google 드라이브\Visual Studio 2015\Projects\갤러그\x64\Debug\갤러그.exe

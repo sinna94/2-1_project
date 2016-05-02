@@ -8,20 +8,20 @@
 
 char game_arr[N][M];
 
-void arr_init(char [N][M]);
-void arr_print(char [N][M]);
+void arr_init(char[N][M]);
+void arr_print(char[N][M]);
 void menu(void);
-void gotoxy(int , int );
+void gotoxy(int, int);
 int select_num(void);
 void cursor_control(char, int *, int *, int *);
 void game_play();
-void player_move(char [N][M], int *, int *);
-void missile_move(char [N][M]);
-void enemy_move(char [N][M], int *);
+void player_move(char[N][M], int *, int *);
+void missile_move(char[N][M]);
+void enemy_move(char[N][M], int *);
 
 int main()
 {
-	
+
 	menu();
 	switch (select_num()) {
 	case 1:
@@ -100,7 +100,7 @@ void menu()
 	gotoxy(40, 25);
 	puts("3. exit");
 
-	
+
 }
 
 void gotoxy(int x, int y)
@@ -119,15 +119,15 @@ int select_num(void)
 	gotoxy(x, y);
 	printf("☞");
 
-	while(1) 
+	while (1)
 	{
 		cursor = getch();
 		gotoxy(x, y);
 		printf(" ");
 		cursor_control(cursor, &x, &y, &space);
-		
+
 		x = 38;
-			
+
 		if ((y > 25))
 			y -= 1;
 
@@ -191,7 +191,7 @@ void cursor_control(char cursor, int *x, int *y, int *space)
 
 void game_play()
 {
-	int x = M/2, y = N, way = 0;
+	int x = M / 2, y = N, way = 0;
 
 	system("cls");
 	while (1)
@@ -218,9 +218,9 @@ void player_move(char game_arr[N][M], int *i, int *j)
 	cursor_control(cursor, i, j, &space);
 
 	*j = N;
-	
-	if (*i >= M-3)
-		*i = M-3;
+
+	if (*i >= M - 3)
+		*i = M - 3;
 
 	gotoxy(*i, *j);
 	printf("*^*");
@@ -243,7 +243,7 @@ void missile_move(char game_arr[N][M])
 					game_arr[i][j] = 0;
 					game_arr[i - 1][j] = 0;
 				}
-				else 
+				else
 				{
 					game_arr[i - 1][j] = 2;
 					game_arr[i][j] = 0;
@@ -264,7 +264,7 @@ void enemy_move(char game_arr[N][M], int *w)
 	{
 		for (i = 0; i < N; i++)
 		{
-			for (j = 0; j <= M-1; j++)		/*한칸씩 왼쪽으로 이동*/
+			for (j = 0; j <= M - 1; j++)		/*한칸씩 왼쪽으로 이동*/
 			{
 				if (game_arr[i][j] == 1)
 				{
@@ -301,7 +301,7 @@ void enemy_move(char game_arr[N][M], int *w)
 	{
 		for (i = N; i > 0; i--)					/*양 끝에 도착하면 한칸 아래로 이동*/
 		{
-			for (j = 0; j < M-1; j++)
+			for (j = 0; j < M - 1; j++)
 			{
 				if (game_arr[i][j] == 1)
 				{
@@ -317,5 +317,3 @@ void enemy_move(char game_arr[N][M], int *w)
 
 	}
 }
-
-

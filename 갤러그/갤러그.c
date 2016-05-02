@@ -3,21 +3,21 @@
 #include <stdlib.h>
 #include <conio.h>
 
-typedef struct {
-	int mx;
-	int my;
-}mxy;
-char game_arr[28][90];
+#define N 27
+#define M 61
 
-void arr_init(char [28][90]);
-void arr_print(char [28][90]);
+char game_arr[N][M];
+
+void arr_init(char [N][M]);
+void arr_print(char [N][M]);
 void menu(void);
 void gotoxy(int , int );
 int select_num(void);
 void cursor_control(char, int *, int *, int *);
 void game_play();
-void player_move(char [28][90], int *, int *);
-void missile_move(char [28][90]);
+void player_move(char [N][M], int *, int *);
+void missile_move(char [N][M]);
+void enemy_move(char [N][M], int *);
 
 int main()
 {
@@ -35,31 +35,30 @@ int main()
 	}
 }
 
-void arr_init(char game_arr[28][90])
+void arr_init(char game_arr[N][M])
 {
 	int i, j;
-	for (i = 0; i < 28; i++)
+	for (i = 0; i < N; i++)
 	{
-		for (j = 0; j < 90; j++)
+		for (j = 0; j < M; j++)
 		{
-			if (i < 8 && i > 4 && j > 10 && j < 80)
+			if (i < 8 && i > 4 && j > 20 && j < 40)
 				game_arr[i][j] = 1;				/*enemy*/
-			else if (i == 27 && j == 44)
-				game_arr[i][j] = 2;				/*player*/
+			else if (j == M - 1)
+				game_arr[i][j] = 3;
 			else
 				game_arr[i][j] = 0;
 		}
 	}
 }
 
-void arr_print(char game_arr[28][90])
+void arr_print(char game_arr[N][M])
 {
 	int i, j;
-	missile_move(game_arr);
 
-	for (i = 0; i < 28; i++)
+	for (i = 0; i < N; i++)
 	{
-		for (j = 0; j < 90; j++)
+		for (j = 0; j < M; j++)
 		{
 			switch (game_arr[i][j]) {
 			case 0:
@@ -69,11 +68,21 @@ void arr_print(char game_arr[28][90])
 				printf("@");	/*enemy*/
 				break;
 			case 2:
-				printf("*^*");	/*player*/
+				printf("!");	/*missile*/
+
+				if (game_arr[i - 1][j] == 1)
+				{
+					game_arr[i][j] = 0;
+					game_arr[i - 1][j] = 0;
+				}
+				else
+				{
+					game_arr[i - 1][j] = 2;
+					game_arr[i][j] = 0;
+				}
 				break;
 			case 3:
-				printf("!");	/*missile*/
-				break;
+				printf("┃");
 			default:
 				break;
 			}
@@ -182,12 +191,12 @@ void cursor_control(char cursor, int *x, int *y, int *space)
 
 void game_play()
 {
-	int x = 27, y = 44;
+	int x = M/2, y = N, way = 0;
 
 	system("cls");
-	
 	while (1)
 	{
+		enemy_move(game_arr, &way);
 		gotoxy(0, 0);
 		arr_print(game_arr);
 		player_move(game_arr, &x, &y);
@@ -195,42 +204,39 @@ void game_play()
 
 }
 
-void player_move(char game_arr[28][90], int *i, int *j)
+void player_move(char game_arr[N][M], int *i, int *j)
 {
 	char cursor;
-	int x = *j, y = *i , space = 0;
-	mxy mxy;
+	int space = 0;
 
-	while (1)
-	{
-		game_arr[*i][*j] = 0;
-		if(cursor = getch());
-			cursor_control(cursor, &x, &y, &space);
+	gotoxy(*i, *j);
+	printf("*^*");
 
-		*i = 27;
-		*j = x;
+	cursor = getch();
+	gotoxy(*i, *j);
+	printf("   ");
+	cursor_control(cursor, i, j, &space);
 
-		game_arr[*i][*j] = 2;
-		gotoxy(0, 0);
-		arr_print(game_arr);
+	*j = N;
+	
+	if (*i >= M-3)
+		*i = M-3;
 
-		if (space == 1)
-		{
-			game_arr[*i-1][*j] = 3;
-			space = 0;
-		}
-	}
+	gotoxy(*i, *j);
+	printf("*^*");
+
+	if (space == 1)
+		game_arr[*j - 1][*i + 1] = 2;
 }
 
-
-void missile_move(char game_arr[28][90])
+void missile_move(char game_arr[N][M])
 {
 	int i, j;
-	for (i = 0; i < 28; i++)
+	for (i = 0; i < N; i++)
 	{
-		for (j = 0; j < 90; j++)
+		for (j = 0; j < M; j++)
 		{
-			if (game_arr[i][j] == 3)
+			if (game_arr[i][j] == 2)
 			{
 				if (game_arr[i - 1][j] == 1)
 				{
@@ -239,10 +245,77 @@ void missile_move(char game_arr[28][90])
 				}
 				else 
 				{
-					game_arr[i - 1][j] = 3;
+					game_arr[i - 1][j] = 2;
 					game_arr[i][j] = 0;
 				}
 			}
 		}
 	}
 }
+
+void enemy_move(char game_arr[N][M], int *w)
+{
+	int i, j, l = 0, r = 0;
+	char tmp;
+
+
+
+	if (*w == 0)						/*왼쪽으로 이동*/
+	{
+		for (i = 0; i < N; i++)
+		{
+			for (j = 0; j <= M-1; j++)		/*한칸씩 왼쪽으로 이동*/
+			{
+				if (game_arr[i][j] == 1)
+				{
+					game_arr[i][j - 1] = game_arr[i][j];
+					game_arr[i][j] = 0;
+				}
+			}
+		}
+	}
+	else if (*w == 1)			/*오른쪽으로 이동*/
+	{
+		for (i = 0; i < N; i++)
+		{
+			for (j = M - 2; j >= 0; j--)		/*한칸씩 오른쪽으로 이동*/
+			{
+				if (game_arr[i][j] == 1)
+				{
+					game_arr[i][j + 1] = game_arr[i][j];
+					game_arr[i][j] = 0;
+				}
+			}
+		}
+	}
+
+	for (i = N; i > 0; i--)					/*양 끝에 도착했는지 검사*/
+	{
+		if (game_arr[i][0] == 1)
+			l = 1;
+		else if (game_arr[i][M - 2] == 1)
+			r = 1;
+	}
+
+	if (r == 1 || l == 1)
+	{
+		for (i = N; i > 0; i--)					/*양 끝에 도착하면 한칸 아래로 이동*/
+		{
+			for (j = 0; j < M-1; j++)
+			{
+				if (game_arr[i][j] == 1)
+				{
+					game_arr[i + 1][j] = game_arr[i][j];
+					game_arr[i][j] = 0;
+				}
+			}
+		}
+		if (r == 1)
+			*w = 0;
+		else if (l == 1)
+			*w = 1;
+
+	}
+}
+
+

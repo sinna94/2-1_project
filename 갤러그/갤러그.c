@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <stdlib.h>
 #include <conio.h>
+#include <time.h>
 
 #define N 27
 #define M 61
@@ -9,7 +10,7 @@
 char game_arr[N][M];
 
 void arr_init(char[N][M]);
-void arr_print(char[N][M]);
+int arr_print(char[N][M], int*);
 void menu(void);
 void gotoxy(int, int);
 int select_num(void);
@@ -18,10 +19,9 @@ void game_play();
 void player_move(char[N][M], int *, int *);
 void missile_move(char[N][M]);
 void enemy_move(char[N][M], int *);
-
+void enemy_missile(char[N][M]);
 int main()
 {
-
 	menu();
 	switch (select_num()) {
 	case 1:
@@ -31,7 +31,6 @@ int main()
 
 	default:
 		break;
-
 	}
 }
 
@@ -52,12 +51,13 @@ void arr_init(char game_arr[N][M])
 	}
 }
 
-void arr_print(char game_arr[N][M])
+int arr_print(char game_arr[N][M], int *score)
 {
-	int i, j;
+	int i, j, cnt = 0;
 
 	for (i = 0; i < N; i++)
 	{
+
 		for (j = 0; j < M; j++)
 		{
 			switch (game_arr[i][j]) {
@@ -66,14 +66,15 @@ void arr_print(char game_arr[N][M])
 				break;
 			case 1:
 				printf("@");	/*enemy*/
+				cnt++;
 				break;
 			case 2:
-				printf("!");	/*missile*/
-
-				if (game_arr[i - 1][j] == 1)
+				printf("!");		/*player_missile*/
+				if (game_arr[i - 1][j] == 1 || game_arr[i - 1][j] == 4)
 				{
 					game_arr[i][j] = 0;
 					game_arr[i - 1][j] = 0;
+					*score += 10;
 				}
 				else
 				{
@@ -83,12 +84,22 @@ void arr_print(char game_arr[N][M])
 				break;
 			case 3:
 				printf("┃");
+				break;
+			case 4:
+				printf("$");		/*enemy_missile*/
+				break;
 			default:
 				break;
 			}
+
 		}
 		printf("\n");
 	}
+	gotoxy(80, 10);
+	printf("현재 점수");
+	gotoxy(80, 11);
+	printf("%d", *score);
+	return cnt;
 }
 void menu()
 {
@@ -162,25 +173,25 @@ void cursor_control(char cursor, int *x, int *y, int *space)
 {
 	switch (cursor)
 	{
-	case 72:				//up
+	case 72:				/*up*/
 		if (*y > 0)
 			*y -= 1;
 		break;
 
 	case 80:
-		*y += 1;			//down
+		*y += 1;			/*down*/
 		break;
 
-	case 75:				//left
+	case 75:				/*left*/
 		if (*x > 0)
 			*x -= 1;
 		break;
 
-	case 77:				//right
+	case 77:				/*right*/
 		*x += 1;
 		break;
 
-	case 32:				//SP
+	case 32:				/*SP*/
 		*space = 1;
 		break;
 
@@ -191,17 +202,22 @@ void cursor_control(char cursor, int *x, int *y, int *space)
 
 void game_play()
 {
-	int x = M / 2, y = N, way = 0;
+	int x = M / 2, y = N, way = 0;		//x좌표, y좌표, 적이 움직이는 방향
+	int score = 0, cnt;
 
 	system("cls");
+	gotoxy(x, y);
+	printf("*^*");
 	while (1)
-	{
+	{	
+		if(_kbhit())
+			player_move(game_arr, &x, &y);
 		enemy_move(game_arr, &way);
+		enemy_missile(game_arr);
 		gotoxy(0, 0);
-		arr_print(game_arr);
-		player_move(game_arr, &x, &y);
+		if (arr_print(game_arr, &score) == 0)
+			break;
 	}
-
 }
 
 void player_move(char game_arr[N][M], int *i, int *j)
@@ -256,9 +272,6 @@ void missile_move(char game_arr[N][M])
 void enemy_move(char game_arr[N][M], int *w)
 {
 	int i, j, l = 0, r = 0;
-	char tmp;
-
-
 
 	if (*w == 0)						/*왼쪽으로 이동*/
 	{
@@ -315,5 +328,31 @@ void enemy_move(char game_arr[N][M], int *w)
 		else if (l == 1)
 			*w = 1;
 
+	}
+}
+
+void enemy_missile(char game_arr[N][M])
+{
+	int i, j, k = 0;
+
+	for (i = 0; i < N; i++)
+	{
+		for (j = 0; j < M; j++)
+		{
+			if (game_arr[i][j] == 4)
+			{
+				game_arr[i + 1][j] = 4;
+				game_arr[i][j] = 0;
+			}
+		}
+	}
+
+	srand(time(NULL));
+	for (k = 0; k < 50; k++)
+	{
+		i = rand() % N;
+		j = rand() % M;
+		if (game_arr[i][j] == 1 && game_arr[i + 1][j] != 1)
+			game_arr[i + 1][j] = 4;
 	}
 }

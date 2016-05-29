@@ -7,19 +7,28 @@
 #define N 27
 #define M 61
 
+typedef struct save {
+	char name[10];
+	int score;
+}save;
+
 char game_arr[N][M];
 
 void arr_init(char[N][M]);
-int arr_print(char[N][M], int*);
+int arr_print(char[N][M], int);
 void menu(void);
 void gotoxy(int, int);
 int select_num(void);
 void cursor_control(char, int *, int *, int *);
 void game_play();
 void player_move(char[N][M], int *, int *);
-void missile_move(char[N][M]);
+void missile_move(char[N][M], int *);
 void enemy_move(char[N][M], int *);
 void enemy_missile(char[N][M]);
+void enemy_missile_move(char game_arr[N][M]);
+int player_die(char[N][M], int, int);
+void save_score(int);
+
 int main()
 {
 	menu();
@@ -51,7 +60,7 @@ void arr_init(char game_arr[N][M])
 	}
 }
 
-int arr_print(char game_arr[N][M], int *score)
+int arr_print(char game_arr[N][M], int score)
 {
 	int i, j, cnt = 0;
 
@@ -70,17 +79,6 @@ int arr_print(char game_arr[N][M], int *score)
 				break;
 			case 2:
 				printf("!");		/*player_missile*/
-				if (game_arr[i - 1][j] == 1 || game_arr[i - 1][j] == 4)
-				{
-					game_arr[i][j] = 0;
-					game_arr[i - 1][j] = 0;
-					*score += 10;
-				}
-				else
-				{
-					game_arr[i - 1][j] = 2;
-					game_arr[i][j] = 0;
-				}
 				break;
 			case 3:
 				printf("┃");
@@ -98,7 +96,7 @@ int arr_print(char game_arr[N][M], int *score)
 	gotoxy(80, 10);
 	printf("현재 점수");
 	gotoxy(80, 11);
-	printf("%d", *score);
+	printf("%d", score);
 	return cnt;
 }
 void menu()
@@ -110,8 +108,6 @@ void menu()
 	puts("2. score");
 	gotoxy(40, 25);
 	puts("3. exit");
-
-
 }
 
 void gotoxy(int x, int y)
@@ -202,22 +198,47 @@ void cursor_control(char cursor, int *x, int *y, int *space)
 
 void game_play()
 {
-	int x = M / 2, y = N, way = 0;		//x좌표, y좌표, 적이 움직이는 방향
-	int score = 0, cnt;
+	int x = M / 2, y = N, way = 0;		/*x좌표, y좌표, 적이 움직이는 방향*/
+	int score = 0, cnt, delay = 0, hard = 5;
 
 	system("cls");
 	gotoxy(x, y);
 	printf("*^*");
 	while (1)
-	{	
-		if(_kbhit())
-			player_move(game_arr, &x, &y);
-		enemy_move(game_arr, &way);
-		enemy_missile(game_arr);
+	{
+
 		gotoxy(0, 0);
-		if (arr_print(game_arr, &score) == 0)
+		if (arr_print(game_arr, score) == 0)
 			break;
+		if (player_die(game_arr, x, y) != 0)
+			break;
+		if (_kbhit())
+			player_move(game_arr, &x, &y);
+
+		if (delay % hard == 0)
+			enemy_move(game_arr, &way);
+
+		enemy_missile(game_arr);
+		missile_move(game_arr, &score);
+		if (delay % hard == 0)
+			enemy_missile_move(game_arr);
+
+
+		gotoxy(80, 13);
+		printf("%d", delay);
+		delay++;
+
+		if (delay % 300 == 0 && hard > 1)
+			hard--;
+
 	}
+	system("cls");
+	gotoxy(30, 20);
+	printf("게임 종료.");
+	
+	Sleep(3000);
+	
+	save_score(score);
 }
 
 void player_move(char game_arr[N][M], int *i, int *j)
@@ -245,7 +266,7 @@ void player_move(char game_arr[N][M], int *i, int *j)
 		game_arr[*j - 1][*i + 1] = 2;
 }
 
-void missile_move(char game_arr[N][M])
+void missile_move(char game_arr[N][M], int *score)
 {
 	int i, j;
 	for (i = 0; i < N; i++)
@@ -255,6 +276,12 @@ void missile_move(char game_arr[N][M])
 			if (game_arr[i][j] == 2)
 			{
 				if (game_arr[i - 1][j] == 1)
+				{
+					game_arr[i][j] = 0;
+					game_arr[i - 1][j] = 0;
+					*score += 10;
+				}
+				else if (game_arr[i - 1][j] == 4)
 				{
 					game_arr[i][j] = 0;
 					game_arr[i - 1][j] = 0;
@@ -335,9 +362,23 @@ void enemy_missile(char game_arr[N][M])
 {
 	int i, j, k = 0;
 
-	for (i = 0; i < N; i++)
+	srand(time(NULL));
+	for (k = 0; k < 30; k++)
 	{
-		for (j = 0; j < M; j++)
+		i = rand() % N;
+		j = rand() % M;
+		if (game_arr[i][j] == 1 && game_arr[i + 1][j] != 1 && game_arr[i + 1][j] != 4)
+			game_arr[i + 1][j] = 4;
+	}
+}
+
+void enemy_missile_move(char game_arr[N][M])
+{
+	int i, j;
+
+	for (i = N; i > 0; i--)
+	{
+		for (j = M; j > 0; j--)
 		{
 			if (game_arr[i][j] == 4)
 			{
@@ -346,13 +387,73 @@ void enemy_missile(char game_arr[N][M])
 			}
 		}
 	}
+}
 
-	srand(time(NULL));
-	for (k = 0; k < 50; k++)
+int player_die(char game_arr[N][M], int x, int y)
+{
+	int i, j;
+
+	for (i = 0; i < N; i++)
 	{
-		i = rand() % N;
-		j = rand() % M;
-		if (game_arr[i][j] == 1 && game_arr[i + 1][j] != 1)
-			game_arr[i + 1][j] = 4;
+		for (j = 0; j < M; j++)
+		{
+			if (game_arr[i][j] == 4 && y == i + 1 && (x == j - 2 || x == j - 1 || x == j))
+				return -1;
+		}
 	}
+	return 0;
+}
+
+void save_score(int score)
+{
+	
+	FILE* fp;
+	save file[11] = { NULL };
+	save save;
+
+	int i, j, k = 0;
+
+	if ((fp = fopen("score.txt", "r")) == NULL)
+	{
+		printf("파일이 열리지 않습니다.\n");
+		exit(1);
+	}
+
+	if (fp != NULL)
+	{
+		for (k = 0; k < 10; k++)
+			if (fscanf(fp, "%s %d", file[k].name, &file[k].score) == EOF)
+				break;
+	}
+	
+	fclose(fp);
+
+	if ((fp = fopen("score.txt", "w")) == NULL)
+	{
+		printf("파일이 열리지 않습니다.\n");
+		exit(1);
+	}
+	gotoxy(30, 20);
+	fputs("이름 입력: ", stdout);
+	gets(file[k].name);
+	file[k].score = score;
+	k++;
+	
+	for (i = 0; i<k; i++)
+		printf("%s %d\n", file[i].name, file[i].score);
+
+	for (i = 1; i < k; i++)
+	{
+		save = file[i];
+		for (j = i - 1; j >= 0 && file[j].score > file[j + 1].score; j--)
+		{
+			file[j + 1] = file[j];
+			file[j] = save;
+		}
+	}
+	
+	for (i = k - 1; i >= 0; i--)
+		fprintf(fp, "%s %d\n", file[i].name, file[i].score);
+	
+	fclose(fp);
 }
